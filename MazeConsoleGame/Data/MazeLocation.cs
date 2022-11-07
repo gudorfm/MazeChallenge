@@ -20,7 +20,7 @@ namespace MazeConsoleGame
 
         public override string ToString()
         {
-            return "North: " + this.North + "\nEast: " + this.East + "\nSouth: " + this.South + "\nWest: " + this.West + "\nOn: " + this.On;
+            return "North: " + this.North + "\nEast: " + this.East + "\nSouth: " + this.South + "\nWest: " + this.West + "\nOn: " + this.On + "\n";
         }
     }
 }

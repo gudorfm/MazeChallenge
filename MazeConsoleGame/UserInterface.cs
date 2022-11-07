@@ -26,7 +26,7 @@ namespace MazeConsoleGame
             MazeUser user = JsonSerializer.Deserialize<MazeUser>(jsonString);
 
             client.Authenticator = new HttpBasicAuthenticator(user.Username, user.Password);
-            RestRequest newMazeRequest = new RestRequest($"", Method.Post);
+            RestRequest newMazeRequest = new RestRequest("/?level=" + user.Difficulty, Method.Post);
             RestResponse newMazeResponse = client.Execute(newMazeRequest);
             mazeId = newMazeResponse.Content;
 
@@ -53,7 +53,7 @@ namespace MazeConsoleGame
             RestResponse<MazeLocation> locationResponse = client.Execute<MazeLocation>(locationRequest);
             return locationResponse.Data;
         }
-
+  
         public bool getPlayerInput()
         {
             Console.Write("Enter your next move: ");
@@ -76,6 +76,7 @@ namespace MazeConsoleGame
             }
             else if(userInput == "x" || userInput == "exit" || userInput == "q" || userInput == "quit")
             {
+                giveUp();
                 return true;
             }
             else if(userInput == "o" || userInput == "options" || userInput== "h" || userInput == "help")
@@ -86,9 +87,9 @@ namespace MazeConsoleGame
             {
                 pickupCoin();
             }
-            else if(userInput == "t" || userInput == "time")
+            else if(userInput == "t" || userInput == "time" || userInput == "i" || userInput == "info")
             {
-                showRemainingTime();
+                showInfo();
             }
             else
             {
@@ -104,28 +105,24 @@ namespace MazeConsoleGame
             if(direction == "north")
             {
                 RestRequest moveRequest = new RestRequest(mazeId + "/steps?direction=NORTH", Method.Post);
-                
                 RestResponse moveResponse = client.Execute(moveRequest);
                 Console.WriteLine(moveResponse.Content);
             }
             else if(direction == "east")
             {
                 RestRequest moveRequest = new RestRequest(mazeId + "/steps?direction=EAST", Method.Post);
-
                 RestResponse moveResponse = client.Execute(moveRequest);
                 Console.WriteLine(moveResponse.Content);
             }
             else if(direction == "south")
             {
                 RestRequest moveRequest = new RestRequest(mazeId + "/steps?direction=SOUTH", Method.Post);
-
                 RestResponse moveResponse = client.Execute(moveRequest);
                 Console.WriteLine(moveResponse.Content);
             }
             else if(direction == "west")
             {
                 RestRequest moveRequest = new RestRequest(mazeId + "/steps?direction=WEST", Method.Post);
-
                 RestResponse moveResponse = client.Execute(moveRequest);
                 Console.WriteLine(moveResponse.Content);
             }
@@ -139,26 +136,35 @@ namespace MazeConsoleGame
 
         public void pickupCoin()
         {
-
+            RestRequest pickupRequest = new RestRequest(mazeId + "/coins", Method.Post);
+            RestResponse pickupResponse = client.Execute(pickupRequest);
         }
-
+   
         public void showCommands()
         {
-            Console.WriteLine("To move through the maze you will need to pick a direction.");
+            Console.WriteLine("\nTo move through the maze you will need to pick a direction.");
             Console.WriteLine("Remember that bumping into a wall will cause you to drop all your coins.");
             Console.WriteLine("To move north enter: n, north, u, or up");
             Console.WriteLine("To move east enter: e, east, r, or right");
             Console.WriteLine("To move south enter: s, south, d, or down");
             Console.WriteLine("To move west enter: w, west, l, or left");
             Console.WriteLine("If you are standing on a coin you can pick it up by entering: p, pickup, g, or grab");
-            Console.WriteLine("To check how much time you have left you can enter: t, or time");
+            Console.WriteLine("To get maze information such as time remaining, coins collected, or time started: t, time, i, info");
             Console.WriteLine("If you need to see this list again you can enter: o, options, h, or help");
-            Console.WriteLine("Finally, if you want to give up and exit the maze you can enter: x, exit, q, or quit");
+            Console.WriteLine("Finally, if you want to give up and exit the maze you can enter: x, exit, q, or quit\n");
         }
 
-        public void showRemainingTime()
+        public void showInfo()
         {
+            RestRequest infoRequest = new RestRequest(mazeId, Method.Get);
+            RestResponse<MazeData> infoResponse = client.Execute<MazeData>(infoRequest);
+            Console.WriteLine(infoResponse.Data);
+        }
 
+        public void giveUp()
+        {
+            RestRequest giveUpRequest = new RestRequest(mazeId, Method.Delete);
+            client.Execute(giveUpRequest);
         }
     }
 }
